@@ -186,6 +186,7 @@ class MySqlScaffolder implements IScaffolder
         $class .= $this->createFields($fields);
         $class .= $this->createForeignKeyFields($foreignKeys);
         $class .= $this->createForeignKeyFields($inverseForeignKeys, true);
+        $class .= $this->createConstructor($className, $fields, $foreignKeys, $inverseForeignKeys);
         $class .= "}\n";
         $class = implode("\n", array_unique(explode("\n", $class)));
         if ($this->saveAfterCreate) {
@@ -207,15 +208,13 @@ class MySqlScaffolder implements IScaffolder
     {
         $output = '';
         foreach ($imports as $import) {
-            if ($this->useSameNamespace) {
-                $output .= "use $import;\n";
-            } else {
+            if (!$this->useSameNamespace) {
                 $className = explode('\\', $import)[count(explode('\\', $import)) - 1];
                 if (!in_array($className, $this->nativeClasses)) {
                     continue;
                 }
-                $output .= "use $import;\n";
             }
+            $output .= "use $import;\n";
         }
         $output .= "\n";
         if ($this->includeRequires) {
@@ -315,5 +314,38 @@ class MySqlScaffolder implements IScaffolder
         $outName = str_replace('_fk', '', $outName);
         $outName = str_replace('_id', '', $outName);
         return substr($outName, 0, strrpos($outName, '_'));
+    }
+
+    private function createConstructor(string $className, array $fields, array $foreignKeys, array $inverseForeignKeys): string
+    {
+        $output = "    public function __construct(";
+        $params = array();
+        foreach ($fields as $field) {
+            $params[] = $field['Type']['type'] . " $" . $this->fieldCasing->convert($field['Field']);
+        }
+        foreach ($foreignKeys as $foreignKey) {
+            $className = $this->getClassName($foreignKey['table']);
+            $params[] = $className . " $" . $this->fieldCasing->convert($foreignKey['field']);
+        }
+        foreach ($inverseForeignKeys as $foreignKey) {
+            $className = $this->getClassName($foreignKey['table']);
+            $params[] = $className . " $" . $this->fieldCasing->convert($foreignKey['field']);
+        }
+        $output .= implode(', ', $params);
+        $output .= ")\n    {\n";
+        foreach ($fields as $field) {
+            $fieldName = $this->fieldCasing->convert($field['Field']);
+            $output .= "        \$this->$fieldName = \$$fieldName;\n";
+        }
+        foreach ($foreignKeys as $foreignKey) {
+            $fieldName = $this->fieldCasing->convert($foreignKey['field']);
+            $output .= "        \$this->$fieldName = \$$fieldName;\n";
+        }
+        foreach ($inverseForeignKeys as $foreignKey) {
+            $fieldName = $this->fieldCasing->convert($foreignKey['field']);
+            $output .= "        \$this->$fieldName = \$$fieldName;\n";
+        }
+        $output .= "    }\n";
+        return $output;
     }
 }

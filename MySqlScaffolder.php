@@ -149,7 +149,7 @@ class MySqlScaffolder implements IScaffolder
             'int', 'bigint' => 'int',
             'datetime' => 'DateTime',
             'tinyint', 'bit' => 'bool',
-            'decimal', 'double' => 'float',
+            'decimal', 'double', 'float' => 'float',
             'varchar', 'longtext', 'text', 'timestamp', 'date' => 'string',
             default => throw new Exception('Unexpected value: ' . $baseType),
         };

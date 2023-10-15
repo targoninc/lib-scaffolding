@@ -22,6 +22,7 @@ use TargonIndustries\Scaffolder\MySqlScaffolder;
 require_once './MySqlScaffolder.php';
 
 $scaffolder = new MySqlScaffolder();
+$scaffolder->settings->useArrayConstructors(true);
 try {
     $scaffolder->scaffold('name\space', './models/somepath', 'somedb');
 } catch (Exception $e) {

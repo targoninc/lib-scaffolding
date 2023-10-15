@@ -24,7 +24,9 @@ require_once './MySqlScaffolder.php';
 $scaffolder = new MySqlScaffolder();
 $scaffolder->settings->useArrayConstructors(true);
 try {
-    $scaffolder->scaffold('name\space', './models/somepath', 'somedb');
+    $scaffolder->scaffold(ScaffoldingLanguage::JS, 'name\space', './models/somepath/js', 'somedb');
+    // Also supports PHP:
+    $scaffolder->scaffold(ScaffoldingLanguage::PHP, 'name\space', './models/somepath/php', 'somedb');
 } catch (Exception $e) {
     echo $e->getMessage();
 }

@@ -186,7 +186,7 @@ class MySqlScaffolder implements IScaffolder
         $class .= $this->createFields($fields);
         $class .= $this->createForeignKeyFields($foreignKeys);
         $class .= $this->createForeignKeyFields($inverseForeignKeys, true);
-        $class .= $this->createConstructor($className, $fields, $foreignKeys, $inverseForeignKeys);
+        $class .= $this->createConstructor($fields, $foreignKeys, $inverseForeignKeys);
         $class .= "}\n";
         $class = implode("\n", array_unique(explode("\n", $class)));
         if ($this->saveAfterCreate) {
@@ -269,7 +269,8 @@ class MySqlScaffolder implements IScaffolder
             if ($comment !== '') {
                 $output .= "    /** $comment */\n";
             }
-            $output .= "    public " . $field['Type']['type'] . " $" . $fieldName . ";\n";
+            $nullable = $field['Null'] === 'YES' ? '?' : '';
+            $output .= "    public " . $nullable . $field['Type']['type'] . " $" . $fieldName . ";\n";
         }
         return $output;
     }
@@ -316,7 +317,7 @@ class MySqlScaffolder implements IScaffolder
         return substr($outName, 0, strrpos($outName, '_'));
     }
 
-    private function createConstructor(string $className, array $fields, array $foreignKeys, array $inverseForeignKeys): string
+    private function createConstructor(array $fields, array $foreignKeys, array $inverseForeignKeys): string
     {
         $output = "    public function __construct(";
         $params = array();

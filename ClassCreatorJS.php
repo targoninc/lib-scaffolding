@@ -6,8 +6,6 @@ use Exception;
 
 class ClassCreatorJS
 {
-
-
     private ScaffoldingSettings $settings;
     private array $nativeTypes = [
         'string',

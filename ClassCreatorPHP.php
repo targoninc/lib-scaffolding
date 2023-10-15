@@ -6,8 +6,6 @@ use Exception;
 
 class ClassCreatorPHP
 {
-
-
     private ScaffoldingSettings $settings;
     private array $nativeImports = [
         'int',

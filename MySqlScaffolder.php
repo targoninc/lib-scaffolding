@@ -6,6 +6,7 @@ use Exception;
 use mysqli;
 
 require_once 'FieldCasing.php';
+require_once 'IScaffolder.php';
 
 class MySqlScaffolder implements IScaffolder
 {
@@ -15,6 +16,21 @@ class MySqlScaffolder implements IScaffolder
     private bool $saveAfterCreate;
     private bool $removePlural;
     private bool $parseConstraints;
+    private bool $includeRequires;
+    private array $nativeImports = [
+        'int',
+        'string',
+        'bool',
+        'float',
+        'array',
+        'DateTime',
+        'Exception',
+    ];
+    private array $nativeClasses = [
+        'DateTime',
+        'Exception',
+    ];
+    private bool $useSameNamespace = false;
 
     public function saveAfterCreate(bool $save): void
     {
@@ -41,6 +57,16 @@ class MySqlScaffolder implements IScaffolder
         $this->parseConstraints = $parse;
     }
 
+    public function includeRequires(bool $include): void
+    {
+        $this->includeRequires = $include;
+    }
+
+    public function useSameNamespace(bool $use): void
+    {
+        $this->useSameNamespace = $use;
+    }
+
     /**
      * @throws Exception
      */
@@ -59,6 +85,7 @@ class MySqlScaffolder implements IScaffolder
         $this->saveAfterCreate(true);
         $this->removePlural(true);
         $this->parseConstraints(true);
+        $this->includeRequires(true);
     }
 
     function setConnection(mixed $connection): void
@@ -150,9 +177,7 @@ class MySqlScaffolder implements IScaffolder
 
         $fields = $this->mapTypes($fields);
         foreach ($fields as $field) {
-            if ($field['Type']['type'] === 'DateTime') {
-                $imports[] = 'DateTime';
-            }
+            $imports[] = $field['Type']['type'];
         }
 
         $className = $this->getClassName($name);
@@ -182,9 +207,27 @@ class MySqlScaffolder implements IScaffolder
     {
         $output = '';
         foreach ($imports as $import) {
-            $output .= "use $import;\n";
+            if ($this->useSameNamespace) {
+                $output .= "use $import;\n";
+            } else {
+                $className = explode('\\', $import)[count(explode('\\', $import)) - 1];
+                if (!in_array($className, $this->nativeClasses)) {
+                    continue;
+                }
+                $output .= "use $import;\n";
+            }
         }
         $output .= "\n";
+        if ($this->includeRequires) {
+            $requireBase = "require_once __DIR__ . '/";
+            foreach ($imports as $import) {
+                $className = explode('\\', $import)[count(explode('\\', $import)) - 1];
+                if (in_array($className, $this->nativeImports)) {
+                    continue;
+                }
+                $output .= $requireBase . $className . ".php';\n";
+            }
+        }
         return $output;
     }
 

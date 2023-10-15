@@ -1,3 +1,8 @@
+# Description
+
+This is a simple scaffolder for MySQL databases. It will generate a model for each table in the specified databases.
+It will resolve the relations between the tables and generate properties for foreign keys in both directions.
+
 # Example usage
 
 ## Environment variables
@@ -23,3 +28,5 @@ try {
     echo $e->getMessage();
 }
 ```
+
+After this, you'll find a file for each table in the database in the specified path. The property types reference the generated classes.

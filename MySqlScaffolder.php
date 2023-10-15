@@ -31,6 +31,7 @@ class MySqlScaffolder implements IScaffolder
         'Exception',
     ];
     private bool $useSameNamespace = false;
+    private bool $useArrayConstructors = false;
 
     public function saveAfterCreate(bool $save): void
     {
@@ -65,6 +66,11 @@ class MySqlScaffolder implements IScaffolder
     public function useSameNamespace(bool $use): void
     {
         $this->useSameNamespace = $use;
+    }
+
+    public function useArrayConstructors(bool $use): void
+    {
+        $this->useArrayConstructors = $use;
     }
 
     /**
@@ -186,7 +192,11 @@ class MySqlScaffolder implements IScaffolder
         $class .= $this->createFields($fields);
         $class .= $this->createForeignKeyFields($foreignKeys);
         $class .= $this->createForeignKeyFields($inverseForeignKeys, true);
-        $class .= $this->createConstructor($fields, $foreignKeys, $inverseForeignKeys);
+        if ($this->useArrayConstructors) {
+            $class .= $this->createArrayConstructor($fields, $foreignKeys, $inverseForeignKeys);
+        } else {
+            $class .= $this->createConstructor($fields, $foreignKeys, $inverseForeignKeys);
+        }
         $class .= "}\n";
         $class = implode("\n", array_unique(explode("\n", $class)));
         if ($this->saveAfterCreate) {
@@ -352,6 +362,28 @@ class MySqlScaffolder implements IScaffolder
         foreach ($inverseForeignKeys as $foreignKey) {
             $fieldName = $this->fieldCasing->convert($foreignKey['field']);
             $output .= "        \$this->$fieldName = \$$fieldName;\n";
+        }
+        $output .= "    }\n";
+        return $output;
+    }
+
+    private function createArrayConstructor(array $fields, array $foreignKeys, array $inverseForeignKeys): string
+    {
+        $output = '    public function __construct(array $input)' . "\n    {\n";
+        foreach ($fields as $field) {
+            $fieldName = $this->fieldCasing->convert($field['Field']);
+            $output .= "        \$this->$fieldName = \$input['$fieldName'];\n";
+        }
+        foreach ($foreignKeys as $foreignKey) {
+            $fieldName = $this->fieldCasing->convert($foreignKey['field']);
+            if ($this->removePlural) {
+                $fieldName = rtrim($fieldName, 's');
+            }
+            $output .= "        \$this->$fieldName = \$input['$fieldName'];\n";
+        }
+        foreach ($inverseForeignKeys as $foreignKey) {
+            $fieldName = $this->fieldCasing->convert($foreignKey['field']);
+            $output .= "        \$this->$fieldName = \$input['$fieldName'];\n";
         }
         $output .= "    }\n";
         return $output;

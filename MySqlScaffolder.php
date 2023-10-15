@@ -333,9 +333,6 @@ class MySqlScaffolder implements IScaffolder
         }
         foreach ($inverseForeignKeys as $foreignKey) {
             $fieldName = $foreignKey['field'];
-            if ($this->removePlural) {
-                $fieldName = rtrim($fieldName, 's');
-            }
             $params[] = "array $" . $this->fieldCasing->convert($fieldName);
         }
         $output .= implode(', ', $params);
@@ -353,9 +350,6 @@ class MySqlScaffolder implements IScaffolder
         }
         foreach ($inverseForeignKeys as $foreignKey) {
             $fieldName = $this->fieldCasing->convert($foreignKey['field']);
-            if ($this->removePlural) {
-                $fieldName = rtrim($fieldName, 's');
-            }
             $output .= "        \$this->$fieldName = \$$fieldName;\n";
         }
         $output .= "    }\n";

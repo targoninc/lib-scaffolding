@@ -12,6 +12,7 @@ class ScaffoldingSettings
     public bool $includeImports = true;
     public bool $useSameNamespace = false;
     public bool $useArrayConstructors = false;
+    public bool $overwrite = true;
 
     public function saveAfterCreate(bool $save): void
     {
@@ -51,5 +52,10 @@ class ScaffoldingSettings
     public function useArrayConstructors(bool $use): void
     {
         $this->useArrayConstructors = $use;
+    }
+
+    public function overwrite(bool $overwrite): void
+    {
+        $this->overwrite = $overwrite;
     }
 }

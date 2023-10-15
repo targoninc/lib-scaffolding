@@ -110,6 +110,9 @@ class ClassCreatorJS
         if (!file_exists($folder)) {
             mkdir($folder, 0777, true);
         }
+        if (!$this->settings->overwrite && file_exists($fullPath)) {
+            return;
+        }
         file_put_contents($fullPath, $content);
     }
 

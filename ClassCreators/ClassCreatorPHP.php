@@ -134,10 +134,9 @@ class ClassCreatorPHP
         $baseType = explode('(', $type)[0];
         $outType = match ($baseType) {
             'int', 'bigint' => 'int',
-            'datetime' => 'DateTime',
             'tinyint', 'bit' => 'bool',
             'decimal', 'double', 'float' => 'float',
-            'varchar', 'longtext', 'text', 'timestamp', 'date' => 'string',
+            'varchar', 'longtext', 'text', 'timestamp', 'date', 'datetime' => 'string',
             default => throw new Exception('Unexpected value: ' . $baseType),
         };
 

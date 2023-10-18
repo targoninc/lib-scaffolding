@@ -13,6 +13,7 @@ class ScaffoldingSettings
     public bool $useSameNamespace = false;
     public bool $useArrayConstructors = false;
     public bool $overwrite = true;
+    public bool $alwaysNullable = false;
 
     public function saveAfterCreate(bool $save): void
     {
@@ -57,5 +58,10 @@ class ScaffoldingSettings
     public function overwrite(bool $overwrite): void
     {
         $this->overwrite = $overwrite;
+    }
+
+    public function alwaysNullable(bool $alwaysNullable): void
+    {
+        $this->alwaysNullable = $alwaysNullable;
     }
 }

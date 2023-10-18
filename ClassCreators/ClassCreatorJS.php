@@ -132,7 +132,7 @@ class ClassCreatorJS
             $fieldName = $this->settings->fieldCasing->convert($field['Field']);
             $fieldType = $field['Type'];
             $nullable = $field['Null'] === 'YES' ? ' = null' : '';
-            $nullableDoc = $field['nullable'] ? '|null' : '';
+            $nullableDoc = $field['nullable'] ? '|null' : ($this->settings->alwaysNullable ? '|null' : '');
             $output .= "    /** @var {" . $fieldType . $nullableDoc . "} $fieldName */\n";
             $output .= "    " . $fieldName . $nullable . ";\n";
         }

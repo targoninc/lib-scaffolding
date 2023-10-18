@@ -164,7 +164,7 @@ class ClassCreatorPHP
             if ($comment !== '') {
                 $output .= "    /** $comment */\n";
             }
-            $nullable = $field['nullable'] ? '?' : '';
+            $nullable = $field['nullable'] ? '?' : ($this->settings->alwaysNullable ? '?' : '');
             $output .= "    public " . $nullable . $field['Type']['type'] . " $" . $fieldName . ";\n";
         }
         return $output;
@@ -180,7 +180,7 @@ class ClassCreatorPHP
             }
             $className = $this->getClassName($foreignKey['type']);
             if ($arrays) {
-                $output .= "    public array $" . $fieldName . ";\n";
+                $output .= "    public ?array $" . $fieldName . ";\n";
             } else {
                 $output .= "    public " . $className . " $" . $fieldName . ";\n";
             }

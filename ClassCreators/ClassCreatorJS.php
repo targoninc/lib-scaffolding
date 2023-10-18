@@ -7,13 +7,6 @@ use Exception;
 class ClassCreatorJS
 {
     private ScaffoldingSettings $settings;
-    private array $nativeTypes = [
-        'string',
-        'boolean',
-        'number',
-        'Date',
-        'Exception',
-    ];
 
     public function __construct(ScaffoldingSettings $settings)
     {
@@ -83,7 +76,7 @@ class ClassCreatorJS
         $class .= "}\n";
         $class = implode("\n", array_unique(explode("\n", $class)));
         if ($this->settings->saveAfterCreate) {
-            $this->saveClass($path . '/' . $className . '.mjs', $class);
+            FileWriter::save($path . '/' . $className . '.mjs', $class, $this->settings->overwrite);
         }
         return $class;
     }
@@ -95,25 +88,13 @@ class ClassCreatorJS
             $requireBase = "import { ";
             foreach ($imports as $import) {
                 $className = explode('\\', $import)[count(explode('\\', $import)) - 1];
-                if (in_array($className, $this->nativeTypes)) {
+                if (in_array($className, LanguageInfoJS::$nativeTypes)) {
                     continue;
                 }
                 $output .= $requireBase . $className . " } from '" . $className . ".mjs';\n";
             }
         }
         return $output;
-    }
-
-    public function saveClass(string $fullPath, string $content): void
-    {
-        $folder = dirname($fullPath);
-        if (!file_exists($folder)) {
-            mkdir($folder, 0777, true);
-        }
-        if (!$this->settings->overwrite && file_exists($fullPath)) {
-            return;
-        }
-        file_put_contents($fullPath, $content);
     }
 
     /**

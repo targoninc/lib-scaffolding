@@ -18,6 +18,7 @@ It will resolve the relations between the tables and generate properties for for
 <?php
 
 use TargonIndustries\Scaffolder\MySqlScaffolder;
+use TargonIndustries\Scaffolder\ScaffoldingLanguage;
 
 require_once './MySqlScaffolder.php';
 

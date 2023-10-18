@@ -9,8 +9,11 @@ require_once 'FieldCasing.php';
 require_once 'IScaffolder.php';
 require_once 'ScaffoldingLanguage.php';
 require_once 'ScaffoldingSettings.php';
-require_once 'ClassCreatorPHP.php';
-require_once 'ClassCreatorJS.php';
+require_once 'ClassCreators/ClassCreatorPHP.php';
+require_once 'ClassCreators/ClassCreatorJS.php';
+require_once 'EnumCreators/EnumCreatorPHP.php';
+require_once 'EnumCreators/EnumCreatorJS.php';
+require_once 'FileWriter.php';
 
 class MySqlScaffolder implements IScaffolder
 {
@@ -29,7 +32,7 @@ class MySqlScaffolder implements IScaffolder
         if (empty($host) || empty($username) || empty($password) || empty($database)) {
             throw new Exception('Missing connection parameters');
         }
-        $this->setConnection(new mysqli($host, $username, $password, $database));
+        $this->setConnection(mysqli_connect($host, $username, $password, $database));
         $this->settings = new ScaffoldingSettings();
     }
 
@@ -114,5 +117,49 @@ class MySqlScaffolder implements IScaffolder
             };
             $classCreator->createClass($namespace, $table, $fields, $foreignKeys, $inverseForeignKeys, $path);
         }
+    }
+
+    /**
+     * @throws Exception if the table does not exist
+     */
+    public function generateEnum(ScaffoldingLanguage $language, string $namespace, string $path, string $database, string $table, string $nameField, string $valueField = null): void
+    {
+        $fields = $this->getFields($database, $table);
+        $fieldExists = false;
+        for ($i = 0; $i < count($fields); $i++) {
+            if ($fields[$i]['Field'] === $nameField) {
+                $fieldExists = true;
+                break;
+            }
+        }
+        if (!$fieldExists) {
+            throw new Exception("Field $nameField does not exist in table $table");
+        }
+        $valueField = $valueField ?? $nameField;
+        if ($valueField !== $nameField) {
+            $fieldExists = false;
+            for ($i = 0; $i < count($fields); $i++) {
+                if ($fields[$i]['Field'] === $valueField) {
+                    $fieldExists = true;
+                    break;
+                }
+            }
+            if (!$fieldExists) {
+                throw new Exception("Field $valueField does not exist in table $table");
+            }
+        }
+        $result = $this->connection->query("SELECT * FROM $database.$table");
+        if (!$result) {
+            throw new Exception('Failed to execute query');
+        }
+        $enumCreator = match ($language) {
+            ScaffoldingLanguage::PHP => new EnumCreatorPHP($this->settings),
+            ScaffoldingLanguage::JS => new EnumCreatorJS($this->settings),
+        };
+        $values = array();
+        while ($row = $result->fetch_assoc()) {
+            $values[] = $row;
+        }
+        $enumCreator->createEnum($namespace, $table, $values, $nameField, $valueField, $path);
     }
 }

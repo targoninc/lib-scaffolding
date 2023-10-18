@@ -7,19 +7,6 @@ use Exception;
 class ClassCreatorPHP
 {
     private ScaffoldingSettings $settings;
-    private array $nativeImports = [
-        'int',
-        'string',
-        'bool',
-        'float',
-        'array',
-        'DateTime',
-        'Exception',
-    ];
-    private array $nativeClasses = [
-        'DateTime',
-        'Exception',
-    ];
 
     public function __construct(ScaffoldingSettings $settings)
     {
@@ -121,21 +108,9 @@ class ClassCreatorPHP
         $class .= "}\n";
         $class = implode("\n", array_unique(explode("\n", $class)));
         if ($this->settings->saveAfterCreate) {
-            $this->saveClass($path . '/' . $className . '.php', $class);
+            FileWriter::save($path . '/' . $className . '.php', $class, $this->settings->overwrite);
         }
         return $class;
-    }
-
-    public function saveClass(string $fullPath, string $content): void
-    {
-        $folder = dirname($fullPath);
-        if (!file_exists($folder)) {
-            mkdir($folder, 0777, true);
-        }
-        if (!$this->settings->overwrite && file_exists($fullPath)) {
-            return;
-        }
-        file_put_contents($fullPath, $content);
     }
 
     /**
@@ -228,7 +203,7 @@ class ClassCreatorPHP
         foreach ($imports as $import) {
             if (!$this->settings->useSameNamespace) {
                 $className = explode('\\', $import)[count(explode('\\', $import)) - 1];
-                if (!in_array($className, $this->nativeClasses)) {
+                if (!in_array($className, LanguageInfoPHP::$nativeClasses)) {
                     continue;
                 }
             }
@@ -239,7 +214,7 @@ class ClassCreatorPHP
             $requireBase = "require_once __DIR__ . '/";
             foreach ($imports as $import) {
                 $className = explode('\\', $import)[count(explode('\\', $import)) - 1];
-                if (in_array($className, $this->nativeImports)) {
+                if (in_array($className, LanguageInfoPHP::$nativeImports)) {
                     continue;
                 }
                 $output .= $requireBase . $className . ".php';\n";

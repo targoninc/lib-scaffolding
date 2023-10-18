@@ -56,20 +56,21 @@ class ClassCreatorPHP
     private function createArrayConstructor(array $fields, array $foreignKeys, array $inverseForeignKeys): string
     {
         $output = '    public function __construct(array $input)' . "\n    {\n";
+        $arrayPrefix = $this->settings->alwaysNullable ? '@' : '';
         foreach ($fields as $field) {
             $fieldName = $this->settings->fieldCasing->convert($field['Field']);
-            $output .= "        \$this->$fieldName = \$input['$fieldName'];\n";
+            $output .= "        \$this->$fieldName = $arrayPrefix\$input['$fieldName'];\n";
         }
         foreach ($foreignKeys as $foreignKey) {
             $fieldName = $this->settings->fieldCasing->convert($foreignKey['field']);
             if ($this->settings->removePlural) {
                 $fieldName = rtrim($fieldName, 's');
             }
-            $output .= "        \$this->$fieldName = \$input['$fieldName'];\n";
+            $output .= "        \$this->$fieldName = $arrayPrefix\$input['$fieldName'];\n";
         }
         foreach ($inverseForeignKeys as $foreignKey) {
             $fieldName = $this->settings->fieldCasing->convert($foreignKey['field']);
-            $output .= "        \$this->$fieldName = \$input['$fieldName'];\n";
+            $output .= "        \$this->$fieldName = $arrayPrefix\$input['$fieldName'];\n";
         }
         $output .= "    }\n";
         return $output;

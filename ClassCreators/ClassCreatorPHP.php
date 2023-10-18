@@ -181,6 +181,9 @@ class ClassCreatorPHP
             if ($arrays) {
                 $output .= "    public ?array $" . $fieldName . ";\n";
             } else {
+                if ($this->settings->alwaysNullable) {
+                    $className = '?' . $className;
+                }
                 $output .= "    public " . $className . " $" . $fieldName . ";\n";
             }
         }

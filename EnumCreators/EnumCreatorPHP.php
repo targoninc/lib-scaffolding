@@ -13,11 +13,7 @@ class EnumCreatorPHP
 
     private function getClassName(string $name): string
     {
-        $className = $this->settings->classCasing->convert($name);
-        if ($this->settings->removePlural) {
-            $className = rtrim($className, 's');
-        }
-        return $className;
+        return $this->settings->classCasing->convert($name);
     }
 
     public function createEnum(string $namespace, string $name, array $values, string $nameField, string $valueField, string $path): void

@@ -13,6 +13,8 @@ require_once 'ClassCreators/ClassCreatorPHP.php';
 require_once 'ClassCreators/ClassCreatorJS.php';
 require_once 'EnumCreators/EnumCreatorPHP.php';
 require_once 'EnumCreators/EnumCreatorJS.php';
+require_once 'LanguageInfo/LanguageInfoPHP.php';
+require_once 'LanguageInfo/LanguageInfoJS.php';
 require_once 'FileWriter.php';
 
 class MySqlScaffolder implements IScaffolder

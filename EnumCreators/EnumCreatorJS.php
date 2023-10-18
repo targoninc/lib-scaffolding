@@ -28,6 +28,6 @@ class EnumCreatorJS
             $output .= "    static " . $this->settings->fieldCasing->convert($value[$nameField]) . " = '" . $value[$valueField] . "';\n";
         }
         $output .= "}\n";
-        FileWriter::save($path . '/' . $className . '.mjs', $output);
+        FileWriter::save($path . '/' . $className . '.mjs', $output, $this->settings->overwrite);
     }
 }

@@ -31,7 +31,7 @@ class EnumCreatorPHP
         $output .= "\n";
         $output .= $this->createArrayMethods($values, $nameField, $valueField);
         $output .= "}\n";
-        FileWriter::save($path . '/' . $className . '.php', $output);
+        FileWriter::save($path . '/' . $className . '.php', $output, $this->settings->overwrite);
     }
 
     public function createArrayMethods(array $values, string $nameField, string $valueField): string

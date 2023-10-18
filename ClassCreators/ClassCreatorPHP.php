@@ -58,19 +58,22 @@ class ClassCreatorPHP
         $output = '    public function __construct(array $input)' . "\n    {\n";
         $arraySuffix = $this->settings->alwaysNullable ? ' ?? null' : '';
         foreach ($fields as $field) {
-            $fieldName = $this->settings->fieldCasing->convert($field['Field']);
-            $output .= "        \$this->$fieldName = \$input['$fieldName']$arraySuffix;\n";
+            $rawName = $field['Field'];
+            $fieldName = $this->settings->fieldCasing->convert($rawName);
+            $output .= "        \$this->$fieldName = \$input['$rawName']$arraySuffix;\n";
         }
         foreach ($foreignKeys as $foreignKey) {
-            $fieldName = $this->settings->fieldCasing->convert($foreignKey['field']);
+            $rawName = $foreignKey['field'];
+            $fieldName = $this->settings->fieldCasing->convert($rawName);
             if ($this->settings->removePlural) {
                 $fieldName = rtrim($fieldName, 's');
             }
-            $output .= "        \$this->$fieldName = \$input['$fieldName']$arraySuffix;\n";
+            $output .= "        \$this->$fieldName = \$input['$rawName']$arraySuffix;\n";
         }
         foreach ($inverseForeignKeys as $foreignKey) {
-            $fieldName = $this->settings->fieldCasing->convert($foreignKey['field']);
-            $output .= "        \$this->$fieldName = \$input['$fieldName']$arraySuffix;\n";
+            $rawName = $foreignKey['field'];
+            $fieldName = $this->settings->fieldCasing->convert($rawName);
+            $output .= "        \$this->$fieldName = \$input['$rawName']$arraySuffix;\n";
         }
         $output .= "    }\n";
         return $output;

@@ -14,6 +14,7 @@ class ScaffoldingSettings
     public bool $useArrayConstructors = false;
     public bool $overwrite = true;
     public bool $alwaysNullable = false;
+    public bool $allowDynamicProperties = false;
 
     public function saveAfterCreate(bool $save): void
     {
@@ -63,5 +64,10 @@ class ScaffoldingSettings
     public function alwaysNullable(bool $alwaysNullable): void
     {
         $this->alwaysNullable = $alwaysNullable;
+    }
+
+    public function allowDynamicProperties(bool $allow): void
+    {
+        $this->allowDynamicProperties = $allow;
     }
 }

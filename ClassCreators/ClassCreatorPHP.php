@@ -100,6 +100,10 @@ class ClassCreatorPHP
 
         $className = $this->getClassName($name);
         $class .= $this->createImports($imports);
+
+        if ($this->settings->allowDynamicProperties) {
+            $class .= "\n#[AllowDynamicProperties]";
+        }
         $class .= "\n\nclass $className\n{\n";
         $class .= $this->createFields($fields);
         $class .= $this->createForeignKeyFields($foreignKeys);
@@ -206,6 +210,9 @@ class ClassCreatorPHP
     private function createImports(array $imports): string
     {
         $output = '';
+        if ($this->settings->allowDynamicProperties) {
+            $output .= "use AllowDynamicProperties;\n";
+        }
         foreach ($imports as $import) {
             if (!$this->settings->useSameNamespace) {
                 $className = explode('\\', $import)[count(explode('\\', $import)) - 1];
@@ -226,6 +233,6 @@ class ClassCreatorPHP
                 $output .= $requireBase . $className . ".php';\n";
             }
         }
-        return $output;
+        return $output . "\n";
     }
 }

@@ -28,7 +28,25 @@ class EnumCreatorPHP
         foreach ($values as $value) {
             $output .= "    const " . $this->settings->fieldCasing->convert($value[$nameField]) . " = '" . $value[$valueField] . "';\n";
         }
+        $output .= "\n";
+        $output .= $this->createArrayMethods($values, $nameField, $valueField);
         $output .= "}\n";
         FileWriter::save($path . '/' . $className . '.php', $output);
+    }
+
+    public function createArrayMethods(array $values, string $nameField, string $valueField): string
+    {
+        $output = "    public static function toMap(): array\n    {\n        return [\n";
+        foreach ($values as $value) {
+            $output .= "            '" . $value[$nameField] . "' => '" . $value[$valueField] . "',\n";
+        }
+        $output .= "        ];\n    }\n";
+        $output .= "\n";
+        $output .= "    public static function toArray(): array\n    {\n        return [\n";
+        foreach ($values as $value) {
+            $output .= "            '" . $value[$nameField] . "',\n";
+        }
+        $output .= "        ];\n    }\n";
+        return $output;
     }
 }

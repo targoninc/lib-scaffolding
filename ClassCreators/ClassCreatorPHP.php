@@ -178,12 +178,12 @@ class ClassCreatorPHP
                 echo "Ignoring foreign key " . $foreignKey['field'] . " in database " . $foreignKey['database'] . "\n";
                 continue;
             }
-            $fieldName = $this->getFieldName($foreignKey['field'], false);
+            $fieldName = $this->getFieldName($foreignKey['field']);
             $className = $this->getClassName($foreignKey['type']);
             if ($arrays) {
                 $arrayClassName = $this->getClassName($foreignKey['type']);
                 $output .= "    /** @var array<" . $arrayClassName . "> */\n";
-                $output .= "    public ?array $" . $fieldName . ";\n";
+                $output .= "    public ?array $" . $fieldName . "s;\n";
             } else {
                 if ($this->settings->alwaysNullable) {
                     $className = '?' . $className;

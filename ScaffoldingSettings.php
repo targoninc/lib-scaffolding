@@ -15,6 +15,7 @@ class ScaffoldingSettings
     public bool $overwrite = true;
     public bool $alwaysNullable = false;
     public bool $allowDynamicProperties = false;
+    public array $ignoredDatabases = [];
 
     public function saveAfterCreate(bool $save): void
     {
@@ -69,5 +70,20 @@ class ScaffoldingSettings
     public function allowDynamicProperties(bool $allow): void
     {
         $this->allowDynamicProperties = $allow;
+    }
+
+    public function ignoreDatabase(string $database): void
+    {
+        $this->ignoredDatabases[] = $database;
+    }
+
+    public function ignoreDatabases(array $databases): void
+    {
+        $this->ignoredDatabases = array_merge($this->ignoredDatabases, $databases);
+    }
+
+    public function resetIgnoredDatabases(): void
+    {
+        $this->ignoredDatabases = [];
     }
 }

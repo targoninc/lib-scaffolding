@@ -64,10 +64,7 @@ class ClassCreatorPHP
         }
         foreach ($foreignKeys as $foreignKey) {
             $rawName = $foreignKey['field'];
-            $fieldName = $this->settings->fieldCasing->convert($rawName);
-            if ($this->settings->removePlural) {
-                $fieldName = rtrim($fieldName, 's');
-            }
+            $fieldName = $this->getFieldName($rawName);
             $output .= "        \$this->$fieldName = \$input['$rawName']$arraySuffix;\n";
         }
         foreach ($inverseForeignKeys as $foreignKey) {
@@ -88,12 +85,8 @@ class ClassCreatorPHP
 
         $fields = $this->mapTypes($fields);
         $imports = array();
-        foreach ($foreignKeys as $foreignKey) {
-            $className = $this->getClassName($foreignKey['type']);
-            if (!in_array($className, $imports) && $foreignKey['type'] !== $name) {
-                $imports[] = $namespace . '\\' . $className;
-            }
-        }
+        $imports = $this->getForeignKeyImports($foreignKeys, $imports, $name, $namespace);
+        $imports = $this->getForeignKeyImports($inverseForeignKeys, $imports, $name, $namespace);
         foreach ($fields as $field) {
             $imports[] = $field['Type']['type'];
         }
@@ -181,12 +174,15 @@ class ClassCreatorPHP
     {
         $output = '';
         foreach ($foreignKeys as $foreignKey) {
-            $fieldName = $this->settings->fieldCasing->convert($foreignKey['field']);
-            if ($this->settings->removePlural && !$arrays) {
-                $fieldName = rtrim($fieldName, 's');
+            if (in_array($foreignKey['database'], $this->settings->ignoredDatabases)) {
+                echo "Ignoring foreign key " . $foreignKey['field'] . " in database " . $foreignKey['database'] . "\n";
+                continue;
             }
+            $fieldName = $this->getFieldName($foreignKey['field'], false);
             $className = $this->getClassName($foreignKey['type']);
             if ($arrays) {
+                $arrayClassName = $this->getClassName($foreignKey['type']);
+                $output .= "    /** @var array<" . $arrayClassName . "> */\n";
                 $output .= "    public ?array $" . $fieldName . ";\n";
             } else {
                 if ($this->settings->alwaysNullable) {
@@ -196,6 +192,15 @@ class ClassCreatorPHP
             }
         }
         return $output;
+    }
+
+    private function getFieldName(string $name, bool $noPlural = true): string
+    {
+        $fieldName = $this->settings->fieldCasing->convert($name);
+        if ($this->settings->removePlural && $noPlural) {
+            $fieldName = rtrim($fieldName, 's');
+        }
+        return $fieldName;
     }
 
     private function getClassName(string $name): string
@@ -234,5 +239,26 @@ class ClassCreatorPHP
             }
         }
         return $output . "\n";
+    }
+
+    /**
+     * @param array $foreignKeys
+     * @param array $imports
+     * @param mixed $name
+     * @param string $namespace
+     * @return array
+     */
+    public function getForeignKeyImports(array $foreignKeys, array $imports, mixed $name, string $namespace): array
+    {
+        foreach ($foreignKeys as $foreignKey) {
+            $className = $this->getClassName($foreignKey['type']);
+            if (!in_array($className, $imports) && $foreignKey['type'] !== $name) {
+                if (in_array($foreignKey['database'], $this->settings->ignoredDatabases)) {
+                    continue;
+                }
+                $imports[] = $namespace . '\\' . $className;
+            }
+        }
+        return $imports;
     }
 }

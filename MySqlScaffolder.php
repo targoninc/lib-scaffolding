@@ -72,6 +72,7 @@ class MySqlScaffolder implements IScaffolder
             $foreignKeys[] = [
                 'type' => $row['REFERENCED_TABLE_NAME'],
                 'field' => $row['REFERENCED_TABLE_NAME'],
+                'database' => $row['TABLE_SCHEMA'],
                 'nullable' => true,
             ];
         }
@@ -86,6 +87,7 @@ class MySqlScaffolder implements IScaffolder
             $foreignKeys[] = [
                 'type' => $row['TABLE_NAME'],
                 'field' => $this->parseConstraintName($row['CONSTRAINT_NAME']),
+                'database' => $row['TABLE_SCHEMA'],
                 'nullable' => true,
             ];
         }

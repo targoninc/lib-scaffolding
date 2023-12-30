@@ -56,21 +56,29 @@ class ClassCreatorPHP
     private function createArrayConstructor(array $fields, array $foreignKeys, array $inverseForeignKeys): string
     {
         $output = '    public function __construct(array $input)' . "\n    {\n";
-        $arraySuffix = $this->settings->alwaysNullable ? ' ?? null' : '';
+        $nullableSuffix = $this->settings->alwaysNullable ? ' ?? null' : '';
         foreach ($fields as $field) {
             $rawName = $field['Field'];
             $fieldName = $this->settings->fieldCasing->convert($rawName);
-            $output .= "        \$this->$fieldName = \$input['$rawName']$arraySuffix;\n";
+            $output .= "        \$this->$fieldName = \$input['$rawName']$nullableSuffix;\n";
         }
         foreach ($foreignKeys as $foreignKey) {
+            if (in_array($foreignKey['database'], $this->settings->ignoredDatabases)) {
+                echo "Ignoring foreign key " . $foreignKey['field'] . " in database " . $foreignKey['database'] . " for constructor\n";
+                continue;
+            }
             $rawName = $foreignKey['field'];
             $fieldName = $this->getFieldName($rawName);
-            $output .= "        \$this->$fieldName = \$input['$rawName']$arraySuffix;\n";
+            $output .= "        \$this->$fieldName = \$input['$rawName']$nullableSuffix;\n";
         }
         foreach ($inverseForeignKeys as $foreignKey) {
+            if (in_array($foreignKey['database'], $this->settings->ignoredDatabases)) {
+                echo "Ignoring foreign key " . $foreignKey['field'] . " in database " . $foreignKey['database'] . " for constructor\n";
+                continue;
+            }
             $rawName = $foreignKey['field'];
             $fieldName = $this->settings->fieldCasing->convert($rawName);
-            $output .= "        \$this->$fieldName = \$input['$rawName']$arraySuffix;\n";
+            $output .= "        \$this->$fieldName = \$input['$rawName']$nullableSuffix;\n";
         }
         $output .= "    }\n";
         return $output;
@@ -175,7 +183,7 @@ class ClassCreatorPHP
         $output = '';
         foreach ($foreignKeys as $foreignKey) {
             if (in_array($foreignKey['database'], $this->settings->ignoredDatabases)) {
-                echo "Ignoring foreign key " . $foreignKey['field'] . " in database " . $foreignKey['database'] . "\n";
+                echo "Ignoring foreign key " . $foreignKey['field'] . " in database " . $foreignKey['database'] . " for fields\n";
                 continue;
             }
             $fieldName = $this->getFieldName($foreignKey['field']);

@@ -11,6 +11,7 @@ enum FieldCasing
 
     public function convert(string $name): string
     {
+        $name = preg_replace('/\s+/', '_', $name);
         return match ($this) {
             FieldCasing::CamelCase => lcfirst(str_replace('_', '', ucwords($name, '_'))),
             FieldCasing::PascalCase => str_replace('_', '', ucwords($name, '_')),
